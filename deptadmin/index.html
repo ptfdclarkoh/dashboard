@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTFD Control Panel - Login</title>
+    <link rel="icon" type="image/x-icon" href="./assets/256.ico">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display.swap" rel="stylesheet">
+    
+    <!-- Our Custom Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- 
+      Firebase v9+ Modular SDKs
+      We import these inside our main.js file
+    -->
+    
+    <!-- Our Custom JavaScript -->
+    <!-- 
+      We use type="module" so we can use `import` statements
+      inside main.js 
+    -->
+    <script type="module" src="main.js"></script>
+
+</head>
+<body class="bg-gray-100 min-h-screen p-4 sm:p-8 flex items-center justify-center">
+
+    <!-- === Login Container === -->
+    <div id="login-container" class="w-full max-w-md">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl space-y-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800">Control Panel Login</h1>
+            <p class="text-center text-gray-500">Please sign in to continue</p>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-bold text-gray-700 mb-2">Email</label>
+                    <input type="email" id="email" name="email" required class="w-full p-3 bg-gray-100 border-2 border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200" placeholder="user@example.com">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-bold text-gray-700 mb-2">Password</label>
+                    <input type="password" id="password" name="password" required class="w-full p-3 bg-gray-100 border-2 border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-300 transform hover:scale-105 shadow-lg">
+                    Login
+                </button>
+            </form>
+            <div id="login-error" class="text-center text-red-600 font-medium hidden">
+                <!-- Error messages will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- === Main Dashboard Container (hidden by default) === -->
+    <div id="dashboard-container" class="max-w-7xl mx-auto hidden w-full">
+        
+        <!-- Header with Sign Out -->
+        <div class="mb-6 flex justify-between items-center">
+             <h1 class="text-2xl font-bold text-gray-800">PTFD Control Panel</h1>
+             <button id="sign-out-button" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                Sign Out
+             </button>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="mb-6 bg-white rounded-xl shadow-sm p-2">
+            <nav class="flex flex-wrap -mb-px space-x-2" aria-label="Tabs">
+                <!-- "Manual Alert" tab has been removed -->
+                <button class="tab-button active" data-tab="news-feed-tab">
+                    News Feed
+                </button>
+                <button class="tab-button" data-tab="unit-status-tab">
+                    Unit Status
+                </button>
+                <button class="tab-button" data-tab="ticker-feed-tab">
+                    Ticker Feed
+                </button>
+                <button class="tab-button" data-tab="notable-addresses-tab">
+                    Notable Addresses
+                </button>
+                <button class="tab-button" data-tab="daily-tasks-tab">
+                    Daily Tasks
+                </button>
+                <!-- NEW MAINTENANCE TAB -->
+                <button class="tab-button" data-tab="maintenance-tab">
+                    Maintenance
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="w-full"> <!-- REMOVED 'relative' from this line -->
+
+            <!-- === Tab Panel 1: Manual Alert (REMOVED) === -->
+
+            <!-- === Tab Panel 2: News Feed === -->
+            <div id="news-feed-tab" class="tab-panel active"> <!-- Set as active by default now -->
+                
+                <!-- Section 1: News Post Entry Form -->
+                <div class="w-full max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg mb-8">
+                    <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">Create New Post</h1>
+                    
+                    <!-- Form -->
+                    <form id="data-form" class="space-y-6">
+                        
+                        <!-- Title -->
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                            <input type="text" id="title" name="Title" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                        </div>
+            
+                        <!-- Description -->
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                            <textarea id="description" name="Description" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required></textarea>
+                        </div>
+
+                        <!-- Location -->
+                        <div>
+                            <label for="location-news" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <input type="text" id="location-news" name="Location" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+            
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             <!-- Applies To Dropdown -->
+                            <div>
+                                <label for="applies-to" class="block text-sm font-medium text-gray-700 mb-1">Applies To *</label>
+                                <select id="applies-to" name="Applies To" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white" required>
+                                    <option value="" disabled selected>Select an audience...</option>
+                                    <option value="ALL">ALL</option>
+                                    <option value="EMS">EMS</option>
+                                    <option value="FIRE">FIRE</option>
+                                </select>
+                            </div>
+
+                            <!-- Posted By Dropdown -->
+                            <div>
+                                <label for="posted-by" class="block text-sm font-medium text-gray-700 mb-1">Posted by *</label>
+                                <select id="posted-by" name="Posted by" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white" required>
+                                    <option value="" disabled selected>Posted By...</option>
+                                    <option value="CHIEF WILLIS">CHIEF WILLIS</option>
+                                    <option value="CHIEF WILLIAMS">CHIEF WILLIAMS</option>
+                                    <option value="CHIEF SHULTZ">CHIEF SHULTZ</option>
+                                    <option value="CAPT HOOD">CAPT HOOD</option>
+                                    <option value="LT SHULTZ">LT SHULTZ</option>
+                                    <option value="LT ROWLAND">LT ROWLAND</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Date/Time to Post -->
+                            <div>
+                                <label for="post-date" class="block text-sm font-medium text-gray-700 mb-1">Date/Time to Post *</label>
+                                <input type="datetime-local" id="post-date" name="Date/Time to Post" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                            </div>
+           
+                            <!-- Date to Remove -->
+                            <div>
+                                <label for="remove-date" class="block text-sm font-medium text-gray-700 mb-1">Date to Remove</label>
+                                <input type="date" id="remove-date" name="Date to Remove" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+            
+                        <!-- Pinned Message (REMOVED) -->
+            
+                        <!-- Submit Button -->
+                        <div>
+                            <button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <span id="button-text">POST</span>
+                                <div id="button-loader" class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6 hidden"></div>
+                            </button>
+                        </div>
+                    </form>
+            
+                    <!-- Success/Error Message Box -->
+                    <div id="message-box-news" class="mt-6 p-4 rounded-md hidden">
+                         <p id="message-text-news"></p>
+                    </div>
+            
+                    <footer class="text-center pt-4 text-gray-500 text-sm border-t border-gray-200">
+                        Created by TFrank615
+                    </footer>
+                </div>
+
+                <!-- Section 2: Existing News Posts -->
+                <div class="w-full max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Existing Posts</h2>
+                        <button id="refresh-posts-button" class="flex items-center bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 px-4 rounded-lg transition duration-200">
+                            <svg id="refresh-icon" class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                            <svg id="refresh-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-700 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+
+                    <div id="posts-message-area" class="text-center text-gray-500 hidden"></div>
+
+                    <!-- Container for existing posts -->
+                    <div id="existing-posts-container" class="space-y-4">
+                        <!-- Posts will be dynamically loaded here -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- === Tab Panel 3: Unit Status === -->
+            <div id="unit-status-tab" class="tab-panel">
+                <!-- Use a responsive grid to show form and list side-by-side on larger screens -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    
+                    <!-- Column 1: Unit Update Form -->
+                    <div class="w-full max-w-lg mx-auto lg:mx-0">
+                        <div class="bg-white rounded-lg shadow-xl p-8">
+                            <div class="text-center mb-8">
+                                <h1 class="text-2xl font-bold text-gray-800">Unit Status Update</h1>
+                                <p class="text-gray-500 mt-2">Update the status and location for a specific unit.</p>
+                            </div>
+            
+                            <form id="update-form">
+                                <div class="space-y-6">
+                                    <div>
+                                        <label for="unit" class="block text-sm font-medium text-gray-700">Unit ID</label>
+                                        <select name="unit" id="unit" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                            <option value="" disabled selected>Select a Unit</option>
+                                            <option value="MEDIC 75">MEDIC 75</option>
+                                            <option value="ENGINE 1-75">ENGINE 1-75</option>
+                                            <option value="ENGINE 2-75">ENGINE 2-75</option>
+                                            <option value="TANKER 75">TANKER 75</option>
+                                            <option value="BRUSH 75">BRUSH 75</option>
+                                            <option value="SUPPORT 75">SUPPORT 75</option>
+                                        </select>
+                                    </div>
+            
+                                    <div>
+                                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                                        <select name="status" id="status" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                            <option value="" disabled selected>Select a Status</option>
+                                            <option value="In Service">In Service</option>
+                                            <option value="Limited Service">Limited Service</option>
+                                            <option value="OOS">OOS</option>
+                                        </select>
+                                    </div>
+            
+                                    <div>
+                                        <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                                        <input type="text" name="location" id="location" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="comments" class="block text-sm font-medium text-gray-700">Comments</label>
+                                        <textarea name="comments" id="comments" rows="3" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                                    </div>
+                                </div>
+            
+                                <div class="mt-8">
+                                    <button type="submit" id="submit-button-unit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                                        <span class="button-text">Update Record</span>
+                                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white button-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </form>
+            
+                            <div id="message-box-unit" class="mt-6 text-center text-sm p-4 rounded-md hidden"></div>
+            
+                            <footer class="text-center pt-4 text-gray-500 text-sm border-t border-gray-200">
+                                Created by TFrank615
+                            </footer>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Current Statuses -->
+                    <div class="w-full max-w-lg mx-auto lg:mx-0 lg:max-w-none">
+                        <div class="bg-white p-8 rounded-xl shadow-lg">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-2xl font-bold text-gray-800">Current Statuses</h2>
+                                <!-- MODIFIED: Replaced refresh button with real-time status -->
+                                <span class="text-sm font-medium text-green-600">Real-time</span>
+                            </div>
+
+                            <div id="status-message-area" class="text-center text-gray-500 hidden"></div>
+
+                            <!-- Container for existing statuses -->
+                            <div id="unit-status-container" class="space-y-4">
+                                <!-- Statuses will be dynamically loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === Tab Panel 4: Ticker Feed === -->
+            <div id="ticker-feed-tab" class="tab-panel">
+                <div class="w-full max-w-lg mx-auto p-8 space-y-8 bg-white rounded-2xl shadow-lg">
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold text-gray-800">Ticker Feed Form</h1>
+                    </div>
+            
+                    <!-- The form that will send data to the Google Sheet -->
+                    <form id="dataForm-ticker" class="mt-8 space-y-6">
+                        <div>
+                            <label for="startDateTime" class="block text-sm font-medium text-gray-700">Start Date/Time</label>
+                            <input type="datetime-local" id="startDateTime" name="Start Date/Time" required
+                                   class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+            
+                        <div>
+                            <label for="endDateTime" class="block text-sm font-medium text-gray-700">End Date/Time</label>
+                            <input type="datetime-local" id="endDateTime" name="End Date/Time" required
+                                   class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+            
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+                            <textarea id="message" name="Message" rows="4" required
+                                      class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                        </div>
+            
+                        <div>
+                            <button type="submit" id="submitButton-ticker"
+                                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
+                                Submit
+                            </button>
+                        </div>
+                    </form>
+            
+                    <!-- Message area to show success or error feedback -->
+                    <div id="responseMessage-ticker" class="text-center text-sm mt-4"></div>
+            
+                    <footer class="text-center pt-4 text-gray-500 text-sm border-t border-gray-200">
+                        Created by TFrank615
+                    </footer>
+                </div>
+            </div>
+
+            <!-- === Tab Panel 5: Notable Addresses (NOW USES FIRESTORE) === -->
+            <div id="notable-addresses-tab" class="tab-panel">
+                <!-- Section 1: Address Entry Form -->
+                <div class="w-full max-w-lg mx-auto p-8 space-y-8 bg-white rounded-xl shadow-lg mb-8">
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold text-gray-800">Notable Address Entry</h1>
+                    </div>
+            
+                    <!-- Form -->
+                    <form id="contact-form" class="space-y-6">
+                        <div>
+                            <label for="Address" class="text-sm font-medium text-gray-700 block">Address</label>
+                            <input type="text" id="Address" name="Address" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        </div>
+            
+                        <div>
+                            <label for="Note" class="text-sm font-medium text-gray-700 block">Note</label>
+                            <textarea id="Note" name="Note" rows="4" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="Priority" class="text-sm font-medium text-gray-700 block">Priority</label>
+                            <select id="Priority" name="Priority" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                <option value="Green">General</option>
+                                <option value="Yellow">Important</option>
+                                <option value="Red">Urgent</option>
+                            </select>
+                        </div>
+            
+                        <div>
+                            <!-- MODIFIED: Added button-text and button-spinner spans for loading state -->
+                            <button type="submit" id="submit-button-address" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
+                                <span class="button-text">Submit</span>
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white button-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
+            
+                    <!-- Status Message Area -->
+                    <div id="status-message-address" class="hidden text-center p-4 rounded-md"></div>
+            
+                    <footer class="text-center pt-4 text-gray-500 text-sm border-t border-gray-200">
+                        Created by TFrank615
+                    </footer>
+                </div>
+
+                <!-- Section 2: Existing Notable Addresses -->
+                <div class="w-full max-w-lg mx-auto bg-white p-8 rounded-xl shadow-lg">
+                    <!-- MODIFIED: Replaced refresh button with real-time status -->
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Existing Addresses</h2>
+                        <span class="text-sm font-medium text-green-600">Real-time</span>
+                    </div>
+
+                    <div id="addresses-message-area" class="text-center text-gray-500 hidden"></div>
+
+                    <!-- Container for existing addresses -->
+                    <div id="existing-addresses-container" class="space-y-4">
+                        <!-- Addresses will be dynamically loaded here by Firestore -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- === Tab Panel 6: Daily Tasks (NOW USES FIRESTORE) === -->
+            <div id="daily-tasks-tab" class="tab-panel">
+                <!-- Use a responsive grid to show form and list side-by-side on larger screens -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    
+                    <!-- Column 1: Add New Task Form -->
+                    <div class="w-full max-w-lg mx-auto lg:mx-0">
+                        <div class="bg-white rounded-lg shadow-xl p-8">
+                            <div class="text-center mb-8">
+                                <h1 class="text-2xl font-bold text-gray-800">Add New Task</h1>
+                                <p class="text-gray-500 mt-2">Add a new daily task to the list.</p>
+                            </div>
+            
+                            <form id="task-form">
+                                <div class="space-y-6">
+                                    <div>
+                                        <label for="task-task" class="block text-sm font-medium text-gray-700">Task</label>
+                                        <textarea name="Task" id="task-task" rows="3" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                                    </div>
+
+                                    <div>
+                                        <label for="task-assignee" class="block text-sm font-medium text-gray-700">Assignee</label>
+                                        <input type="text" name="Assignee" id="task-assignee" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g., Station Crew">
+                                    </div>
+            
+                                    <div>
+                                        <label for="task-day" class="block text-sm font-medium text-gray-700">Day to Appear</dlabel>
+                                        <select name="Day to appear" id="task-day" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                            <option value="" disabled selected>Select a Day</option>
+                                            <option value="Daily">Daily</option>
+                                            <option value="Monday">Monday</option>
+                                            <option value="Tuesday">Tuesday</option>
+                                            <option value="Wednesday">Wednesday</option>
+                                            <option value="Thursday">Thursday</option>
+                                            <option value="Friday">Friday</option>
+                                            <option value="Saturday">Saturday</option>
+                                            <option value="Sunday">Sunday</option>
+                                        </select>
+                                    </div>
+                                </div>
+            
+                                <div class="mt-8">
+                                    <button type="submit" id="submit-button-task" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                                        <span class="button-text">Add Task</span>
+                                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white button-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </form>
+            
+                            <div id="message-box-task" class="mt-6 text-center text-sm p-4 rounded-md hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Existing Tasks -->
+                    <div class="w-full max-w-lg mx-auto lg:mx-0 lg:max-w-none">
+                        <div class="bg-white p-8 rounded-xl shadow-lg">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-2xl font-bold text-gray-800">Existing Tasks</h2>
+                                <!-- Refresh Button is no longer needed for real-time data -->
+                                <span class="text-sm font-medium text-green-600">Real-time</span>
+                            </div>
+
+                            <div id="tasks-message-area" class="text-center text-gray-500 hidden"></div>
+
+                            <!-- Container for existing tasks -->
+                            <div id="existing-tasks-container" class="space-y-3">
+                                <!-- Tasks will be dynamically loaded here by Firestore -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- === NEW Tab Panel 7: Maintenance === -->
+            <div id="maintenance-tab" class="tab-panel">
+                <!-- Use a responsive grid to show form and list side-by-side on larger screens -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    
+                    <!-- Column 1: Add New Maintenance Entry Form -->
+                    <div class="w-full max-w-lg mx-auto lg:mx-0">
+                        <div class="bg-white rounded-lg shadow-xl p-8">
+                            <div class="text-center mb-8">
+                                <h1 class="text-2xl font-bold text-gray-800">Add Maintenance Entry</h1>
+                                <p class="text-gray-500 mt-2">Add a new service or issue to the list.</p>
+                            </div>
+            
+                            <form id="maintenance-form">
+                                <div class="space-y-6">
+                                    <div>
+                                        <label for="maintenance-vendor" class="block text-sm font-medium text-gray-700">Vendor</label>
+                                        <input type="text" name="Vendor" id="maintenance-vendor" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g., Cummins, E-One">
+                                    </div>
+
+                                    <div>
+                                        <label for="maintenance-service" class="block text-sm font-medium text-gray-700">Service or Issue</label>
+                                        <textarea name="Service" id="maintenance-service" rows="3" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="maintenance-location" class="block text-sm font-medium text-gray-700">Location</label>
+                                        <input type="text" name="Location" id="maintenance-location" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g., Station 75, Cummins Indy">
+                                    </div>
+            
+                                    <div>
+                                        <label for="maintenance-date" class="block text-sm font-medium text-gray-700">Date</label>
+                                        <input type="date" name="Date" id="maintenance-date" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    </div>
+                                </div>
+            
+                                <div class="mt-8">
+                                    <button type="submit" id="submit-button-maintenance" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                                        <span class="button-text">Add Entry</span>
+                                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white button-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </form>
+            
+                            <div id="message-box-maintenance" class="mt-6 text-center text-sm p-4 rounded-md hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Existing Maintenance Entries -->
+                    <div class="w-full max-w-lg mx-auto lg:mx-0 lg:max-w-none">
+                        <div class="bg-white p-8 rounded-xl shadow-lg">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-2xl font-bold text-gray-800">Existing Entries</h2>
+                                <span class="text-sm font-medium text-green-600">Real-time</span>
+                            </div>
+
+                            <div id="maintenance-message-area" class="text-center text-gray-500 hidden"></div>
+
+                            <!-- Container for existing entries -->
+                            <div id="existing-maintenance-container" class="space-y-3">
+                                <!-- Maintenance entries will be dynamically loaded here by Firestore -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <!-- === Edit Post Modal === -->
+    <div id="edit-post-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit News Post</h2>
+                <span id="modal-close-button" class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body mt-6">
+                <!-- Form for editing -->
+                <form id="edit-form" class="space-y-6">
+                    <input type="hidden" id="edit-row-id" name="rowId">
+                    
+                    <!-- Title -->
+                    <div>
+                        <label for="edit-title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                        <input type="text" id="edit-title" name="Title" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+        
+                    <!-- Description -->
+                    <div>
+                        <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                        <textarea id="edit-description" name="Description" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required></textarea>
+                    </div>
+
+                    <!-- Location -->
+                    <div>
+                        <label for="edit-location-news" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                        <input type="text" id="edit-location-news" name="Location" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+        
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <!-- Applies To Dropdown -->
+                        <div>
+                            <label for="edit-applies-to" class="block text-sm font-medium text-gray-700 mb-1">Applies To *</label>
+                            <select id="edit-applies-to" name="Applies To" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white" required>
+                                <option value="ALL">ALL</option>
+                                <option value="EMS">EMS</option>
+                                <option value="FIRE">FIRE</option>
+                            </select>
+                        </div>
+
+                        <!-- Posted By Dropdown -->
+                        <div>
+                            <label for="edit-posted-by" class="block text-sm font-medium text-gray-700 mb-1">Posted by *</label>
+                            <select id="edit-posted-by" name="Posted by" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white" required>
+                                <option value="CHIEF WILLIS">CHIEF WILLIS</option>
+                                <option value="CHIEF WILLIAMS">CHIEF WILLIAMS</option>
+                                <option value="CHIEF SHULTZ">CHIEF SHULTZ</option>
+                                <option value="CAPT HOOD">CAPT HOOD</option>
+                                <option value="LT SHULTZ">LT SHULTZ</option>
+                                <option value="LT ROWLAND">LT ROWLAND</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Date/Time to Post -->
+                        <div>
+                            <label for="edit-post-date" class="block text-sm font-medium text-gray-700 mb-1">Date/Time to Post *</label>
+                            <input type="datetime-local" id="edit-post-date" name="Date/Time to Post" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                        </div>
+       
+                        <!-- Date to Remove -->
+                        <div>
+                            <label for="edit-remove-date" class="block text-sm font-medium text-gray-700 mb-1">Date to Remove</label>
+                            <input type="date" id="edit-remove-date" name="Date to Remove" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+        
+                    <!-- Submit Button -->
+                    <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                        <button type="button" id="edit-cancel-button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit" id="edit-save-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- === Edit Address Modal (NOW USES FIRESTORE) === -->
+    <div id="edit-address-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Notable Address</h2>
+                <span id="address-modal-close-button" class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body mt-6">
+                <!-- Form for editing -->
+                <form id="edit-address-form" class="space-y-6">
+                    <!-- Note: We now use data-id, not a hidden input, but keep form structure -->
+                    
+                    <!-- Address -->
+                    <div>
+                        <label for="edit-address-address" class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                        <input type="text" id="edit-address-address" name="Address" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+        
+                    <!-- Note -->
+                    <div>
+                        <label for="edit-address-note" class="block text-sm font-medium text-gray-700 mb-1">Note *</label>
+                        <textarea id="edit-address-note" name="Note" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required></textarea>
+                    </div>
+
+                    <!-- Priority -->
+                    <div>
+                        <label for="edit-address-priority" class="block text-sm font-medium text-gray-700 mb-1">Priority *</label>
+                        <select id="edit-address-priority" name="Priority" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white" required>
+                            <option value="Green">General</option>
+                            <option value="Yellow">Important</option>
+                            <option value="Red">Urgent</option>
+                        </select>
+                    </div>
+        
+                    <!-- Submit Button -->
+                    <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                        <button type="button" id="edit-address-cancel-button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit" id="edit-address-save-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- === Edit Task Modal (NOW USES FIRESTORE) === -->
+    <div id="edit-task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Daily Task</h2>
+                <span id="task-modal-close-button" class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body mt-6">
+                <!-- Form for editing -->
+                <form id="edit-task-form" class="space-y-6">
+                    <!-- Note: We now use data-id, not a hidden input, but keep form structure -->
+                    
+                    <div>
+                        <label for="edit-task-task" class="block text-sm font-medium text-gray-700">Task</label>
+                        <textarea name="Task" id="edit-task-task" rows="3" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="edit-task-assignee" class="block text-sm font-medium text-gray-700">Assignee</label>
+                        <input type="text" name="Assignee" id="edit-task-assignee" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+
+                    <div>
+                        <label for="edit-task-day" class="block text-sm font-medium text-gray-700">Day to Appear</label>
+                        <select name="Day to appear" id="edit-task-day" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="Daily">Daily</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
+                    </div>
+        
+                    <!-- Submit Button -->
+                    <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                        <button type="button" id="edit-task-cancel-button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit" id="edit-task-save-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- === NEW Edit Maintenance Modal === -->
+    <div id="edit-maintenance-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Maintenance Entry</h2>
+                <span id="maintenance-modal-close-button" class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body mt-6">
+                <!-- Form for editing -->
+                <form id="edit-maintenance-form" class="space-y-6">
+                    
+                    <div>
+                        <label for="edit-maintenance-vendor" class="block text-sm font-medium text-gray-700">Vendor</label>
+                        <input type="text" name="Vendor" id="edit-maintenance-vendor" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+
+                    <div>
+                        <label for="edit-maintenance-service" class="block text-sm font-medium text-gray-700">Service or Issue</label>
+                        <textarea name="Service" id="edit-maintenance-service" rows="3" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="edit-maintenance-location" class="block text-sm font-medium text-gray-700">Location</label>
+                        <input type="text" name="Location" id="edit-maintenance-location" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+
+                    <div>
+                        <label for="edit-maintenance-date" class="block text-sm font-medium text-gray-700">Date</label>
+                        <input type="date" name="Date" id="edit-maintenance-date" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+        
+                    <!-- Submit Button -->
+                    <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                        <button type="button" id="edit-maintenance-cancel-button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit" id="edit-maintenance-save-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
