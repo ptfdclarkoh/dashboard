@@ -549,7 +549,10 @@
             };
 
             try {
-                await setDoc(configDocRef, configData);
+                // *** FIXED: Used { merge: true } so we don't overwrite 'lastUpdated' ***
+                // This prevents the dashboard from thinking a refresh was requested.
+                await setDoc(configDocRef, configData, { merge: true });
+                
                 const feedback = document.getElementById('save-feedback');
                 feedback.classList.remove('hidden');
                 feedback.classList.add('flex');
