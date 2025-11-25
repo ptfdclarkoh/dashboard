@@ -314,12 +314,25 @@ function setupTaskTabListener() {
             setLoading(true, submitButton, buttonText, buttonSpinner);
 
             try {
+                // === MODIFICATION: Get days from checkboxes ===
+                const selectedDays = [];
+                form.querySelectorAll('input[name="task-day"]:checked').forEach((checkbox) => {
+                    selectedDays.push(checkbox.value);
+                });
+
+                if (selectedDays.length === 0) {
+                    showMessage(messageBox, 'Please select at least one day.', 'error');
+                    setLoading(false, submitButton, buttonText, buttonSpinner);
+                    return;
+                }
+                // === END MODIFICATION ===
+
                 // Get data from form
                 const formData = new FormData(form);
                 const data = {
                     task: formData.get('Task'),
                     assignee: formData.get('Assignee'),
-                    day: formData.get('Day to appear'),
+                    day: selectedDays, // Save the array of days
                     createdAt: serverTimestamp() // Add a timestamp
                 };
 
@@ -328,6 +341,7 @@ function setupTaskTabListener() {
 
                 showMessage(messageBox, 'Task added successfully.', 'success'); // MODIFIED
                 form.reset();
+                // Checkboxes are reset automatically by form.reset()
             } catch (error) {
                 console.error("Error adding task: ", error);
                 showMessage(messageBox, error.message, 'error'); // MODIFIED
@@ -387,6 +401,10 @@ function setupTaskTabListener() {
         const card = document.createElement('div');
         card.className = 'p-3 border border-gray-200 rounded-lg shadow-sm bg-white';
         
+        // === MODIFICATION: Handle 'day' as an array ===
+        const daysString = Array.isArray(task.day) ? task.day.join(', ') : (task.day || 'N/A');
+        // === END MODIFICATION ===
+
         card.innerHTML = `
             <div class="flex justify-between items-start">
                 <h3 class="text-base font-bold text-gray-900">${task.task}</h3>
@@ -397,7 +415,7 @@ function setupTaskTabListener() {
             </div>
             <div class="text-sm text-gray-600 space-y-1 pt-2 mt-1 border-t border-gray-100">
                 <p><strong>Assignee:</strong> ${task.assignee}</p>
-                <p><strong>Day:</strong> ${task.day}</p>
+                <p><strong>Day(s):</strong> ${daysString}</p>
             </div>
         `;
 
@@ -471,7 +489,24 @@ function setupTaskTabListener() {
         currentEditTaskId = task.id; // Store the ID
         editForm.querySelector('#edit-task-task').value = task.task;
         editForm.querySelector('#edit-task-assignee').value = task.assignee;
-        editForm.querySelector('#edit-task-day').value = task.day;
+        
+        // === MODIFICATION: Check the correct boxes ===
+        // First, uncheck all boxes
+        editForm.querySelectorAll('input[name="edit-task-day"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Then, check the ones that are in the task.day array
+        if (Array.isArray(task.day)) {
+            task.day.forEach(day => {
+                const checkbox = editForm.querySelector(`input[name="edit-task-day"][value="${day}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+        // === END MODIFICATION ===
+
         modal.style.display = 'block';
     }
 
@@ -479,6 +514,7 @@ function setupTaskTabListener() {
         currentEditTaskId = null;
         modal.style.display = 'none';
         editForm.reset();
+        // Checkboxes are reset automatically
     }
 
     async function handleUpdateTask(e) {
@@ -489,12 +525,31 @@ function setupTaskTabListener() {
         saveButton.textContent = 'Saving...';
 
         try {
+            // === MODIFICATION: Get days from edit form checkboxes ===
+            const selectedDays = [];
+            editForm.querySelectorAll('input[name="edit-task-day"]:checked').forEach((checkbox) => {
+                selectedDays.push(checkbox.value);
+            });
+
+            if (selectedDays.length === 0) {
+                // We can't use showMessage as it's not in the modal.
+                // For now, we'll just log an error and stop.
+                // A more robust solution would be a message inside the modal.
+                console.error("Please select at least one day.");
+                // Let's show the error in the main list area
+                showListMessage(tasksMessageArea, "Error: Please select at least one day in the edit modal.", 'error');
+                saveButton.disabled = false;
+                saveButton.textContent = 'Save Changes';
+                return;
+            }
+            // === END MODIFICATION ===
+
             // Get data from edit form
             const formData = new FormData(editForm);
             const data = {
                 task: formData.get('Task'),
                 assignee: formData.get('Assignee'),
-                day: formData.get('Day to appear'),
+                day: selectedDays, // Save the array
             };
 
             // Create reference to the document and update it

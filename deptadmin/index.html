@@ -302,45 +302,62 @@
 
             <!-- === Tab Panel 4: Ticker Feed === -->
             <div id="ticker-feed-tab" class="tab-panel">
-                <div class="w-full max-w-lg mx-auto p-8 space-y-8 bg-white rounded-2xl shadow-lg">
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold text-gray-800">Ticker Feed Form</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="w-full max-w-lg mx-auto p-8 space-y-8 bg-white rounded-2xl shadow-lg">
+                        <div class="text-center">
+                            <h1 class="text-3xl font-bold text-gray-800">Ticker Feed Form</h1>
+                            <p class="text-gray-500 mt-2">Add a message to the scrolling ticker.</p>
+                        </div>
+                
+                        <!-- The form that will send data to Firestore -->
+                        <form id="dataForm-ticker" class="mt-8 space-y-6">
+                            <div>
+                                <label for="startDateTime" class="block text-sm font-medium text-gray-700">Start Date/Time</label>
+                                <input type="datetime-local" id="startDateTime" name="startDateTime" required
+                                    class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            </div>
+                
+                            <div>
+                                <label for="endDateTime" class="block text-sm font-medium text-gray-700">End Date/Time</label>
+                                <input type="datetime-local" id="endDateTime" name="endDateTime" required
+                                    class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            </div>
+                
+                            <div>
+                                <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+                                <textarea id="message" name="message" rows="4" required
+                                        class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                            </div>
+                
+                            <div>
+                                <button type="submit" id="submitButton-ticker"
+                                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
+                                    Submit to Ticker
+                                </button>
+                            </div>
+                        </form>
+                
+                        <!-- Message area to show success or error feedback -->
+                        <div id="responseMessage-ticker" class="text-center text-sm mt-4 hidden p-2 rounded"></div>
+                
+                        <footer class="text-center pt-4 text-gray-500 text-sm border-t border-gray-200">
+                            Created by TFrank615
+                        </footer>
                     </div>
-            
-                    <!-- The form that will send data to the Google Sheet -->
-                    <form id="dataForm-ticker" class="mt-8 space-y-6">
-                        <div>
-                            <label for="startDateTime" class="block text-sm font-medium text-gray-700">Start Date/Time</label>
-                            <input type="datetime-local" id="startDateTime" name="Start Date/Time" required
-                                   class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+
+                    <!-- Existing Tickers List -->
+                    <div class="w-full max-w-lg mx-auto lg:mx-0 lg:max-w-none">
+                        <div class="bg-white p-8 rounded-xl shadow-lg">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-2xl font-bold text-gray-800">Active Tickers</h2>
+                                <span class="text-sm font-medium text-green-600">Real-time</span>
+                            </div>
+                            
+                            <div id="existing-tickers-container" class="space-y-4">
+                                <!-- Loaded dynamically -->
+                            </div>
                         </div>
-            
-                        <div>
-                            <label for="endDateTime" class="block text-sm font-medium text-gray-700">End Date/Time</label>
-                            <input type="datetime-local" id="endDateTime" name="End Date/Time" required
-                                   class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        </div>
-            
-                        <div>
-                            <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
-                            <textarea id="message" name="Message" rows="4" required
-                                      class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
-                        </div>
-            
-                        <div>
-                            <button type="submit" id="submitButton-ticker"
-                                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
-                                Submit
-                            </button>
-                        </div>
-                    </form>
-            
-                    <!-- Message area to show success or error feedback -->
-                    <div id="responseMessage-ticker" class="text-center text-sm mt-4"></div>
-            
-                    <footer class="text-center pt-4 text-gray-500 text-sm border-t border-gray-200">
-                        Created by TFrank615
-                    </footer>
+                    </div>
                 </div>
             </div>
 
@@ -840,6 +857,114 @@
             </div>
         </div>
     </div>
+
+    <!-- === Specific Script for Ticker Tab Logic === -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCuo69DgYtxCdVRmRvziVfnS69koYMGJ0E",
+          authDomain: "dashboard-1fb59.firebaseapp.com",
+          projectId: "dashboard-1fb59",
+          storageBucket: "dashboard-1fb59.firebasestorage.app",
+          messagingSenderId: "576174466807",
+          appId: "1:576174466807:web:3d54f217da65b8480815f2",
+          measurementId: "G-GHFVYG8C2Y"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Wait for DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            const tickerForm = document.getElementById('dataForm-ticker');
+            const responseDiv = document.getElementById('responseMessage-ticker');
+            const tickersContainer = document.getElementById('existing-tickers-container');
+
+            // Listen for Ticker Updates
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    const q = query(collection(db, 'ticker'), orderBy('startDateTime', 'desc'));
+                    onSnapshot(q, (snapshot) => {
+                        tickersContainer.innerHTML = '';
+                        snapshot.forEach(docSnap => {
+                            const data = docSnap.data();
+                            const startDate = new Date(data.startDateTime).toLocaleString();
+                            const endDate = new Date(data.endDateTime).toLocaleString();
+                            
+                            const div = document.createElement('div');
+                            div.className = 'bg-white border rounded-lg p-4 shadow-sm flex justify-between items-center';
+                            div.innerHTML = `
+                                <div>
+                                    <p class="font-bold text-gray-800">${data.message}</p>
+                                    <p class="text-sm text-gray-500">Start: ${startDate} | End: ${endDate}</p>
+                                </div>
+                                <button class="delete-ticker text-red-500 hover:text-red-700" data-id="${docSnap.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            `;
+                            tickersContainer.appendChild(div);
+                        });
+
+                        // Attach delete listeners
+                        document.querySelectorAll('.delete-ticker').forEach(btn => {
+                            btn.addEventListener('click', async (e) => {
+                                if(confirm('Delete this ticker message?')) {
+                                    const id = e.currentTarget.getAttribute('data-id');
+                                    await deleteDoc(doc(db, 'ticker', id));
+                                }
+                            });
+                        });
+                    });
+                }
+            });
+
+            // Form Submission
+            tickerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('submitButton-ticker');
+                btn.disabled = true;
+                btn.textContent = 'Saving...';
+                responseDiv.classList.add('hidden');
+
+                const start = document.getElementById('startDateTime').value;
+                const end = document.getElementById('endDateTime').value;
+                const message = document.getElementById('message').value;
+
+                if (!auth.currentUser) {
+                    alert("You must be logged in to add tickers.");
+                    btn.disabled = false;
+                    return;
+                }
+
+                try {
+                    await addDoc(collection(db, 'ticker'), {
+                        startDateTime: start,
+                        endDateTime: end,
+                        message: message,
+                        createdAt: new Date().toISOString()
+                    });
+                    
+                    tickerForm.reset();
+                    responseDiv.textContent = "Ticker added successfully!";
+                    responseDiv.className = "text-center text-sm mt-4 p-2 rounded bg-green-100 text-green-700 block";
+                } catch (error) {
+                    console.error("Error adding ticker:", error);
+                    responseDiv.textContent = "Error saving ticker: " + error.message;
+                    responseDiv.className = "text-center text-sm mt-4 p-2 rounded bg-red-100 text-red-700 block";
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Submit to Ticker';
+                    setTimeout(() => responseDiv.classList.add('hidden'), 3000);
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>
