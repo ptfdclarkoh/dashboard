@@ -46,6 +46,7 @@ let unitStatusUnsubscribe = null;
 let maintenanceCollectionRef = null;
 let maintenanceUnsubscribe = null;
 let tickerUnsubscribe = null;
+let layoutUnsubscribe = null; // New listener for layout
 
 // --- ROUTER LOGIC (Replaces Tabs) ---
 window.Router = {
@@ -88,9 +89,6 @@ window.Router = {
         if(window.innerWidth >= 768) {
             sidebar.classList.remove('-translate-x-full', 'translate-x-0');
         }
-        
-        // Trigger logic specific to views (optional lazy loading)
-        // Note: Real-time listeners are activated on login now to keep data fresh across view switches
     }
 };
 
@@ -183,6 +181,10 @@ onAuthStateChanged(auth, (user) => {
         setupAddressLogic(); 
         setupMaintenanceLogic();
         setupTickerLogic();
+        fetchPosts();
+        
+        // Start Layout Listener
+        setupRealtimeLayout();
         
     } else {
         // Logged Out
@@ -201,6 +203,7 @@ onAuthStateChanged(auth, (user) => {
         if(unitStatusUnsubscribe) unitStatusUnsubscribe();
         if(maintenanceUnsubscribe) maintenanceUnsubscribe();
         if(tickerUnsubscribe) tickerUnsubscribe();
+        if(layoutUnsubscribe) layoutUnsubscribe();
     }
 });
 
@@ -224,6 +227,36 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
 document.getElementById('sign-out-button').addEventListener('click', () => {
     signOut(auth);
 });
+
+// --- NEW: REAL-TIME LAYOUT SYSTEM ---
+function setupRealtimeLayout() {
+    const collectionRef = collection(db, 'layout_settings');
+    layoutUnsubscribe = onSnapshot(collectionRef, (snapshot) => {
+        snapshot.forEach(docSnap => {
+            const containerId = docSnap.id;
+            const settings = docSnap.data();
+            const el = document.getElementById(containerId);
+
+            if (el) {
+                // Classes to strip
+                const classesToRemove = [
+                    'w-full', 'w-3/4', 'w-2/3', 'w-1/2', 'w-1/3', 'w-1/4',
+                    'grid-cols-1', 'grid-cols-2', 'grid-cols-3', 'grid-cols-4',
+                    'gap-0', 'gap-1', 'gap-2', 'gap-3', 'gap-4', 'gap-5', 'gap-6', 'gap-7', 'gap-8'
+                ];
+                el.classList.remove(...classesToRemove);
+                
+                // Add new classes
+                if(settings.width) el.classList.add(settings.width);
+                if(settings.cols) el.classList.add(settings.cols);
+                if(settings.gap) el.classList.add(settings.gap);
+                
+                // Ensure grid is active
+                el.classList.add('grid');
+            }
+        });
+    });
+}
 
 
 // --- 3. MODULE LOGIC ---
@@ -764,8 +797,8 @@ maintForm.onsubmit = async (e) => {
     await setDoc(doc(db, 'maintenance', currentMaintId), {
         vendor: maintForm.querySelector('[name="Vendor"]').value,
         service: maintForm.querySelector('[name="Service"]').value,
-        location: maintForm.querySelector('[name="Location"]').value,
-        date: maintForm.querySelector('[name="Date"]').value
+        location: maintForm.querySelector('[name="Location\"]').value,
+        date: maintForm.querySelector('[name="Date\"]').value
     }, {merge: true});
     maintModal.style.display = 'none';
 };
