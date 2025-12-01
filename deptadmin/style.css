@@ -63,3 +63,10 @@ body {
     border-color: #4f46e5; /* indigo-600 */
     color: #111827; /* gray-900 */
 }
+
+/* Custom styles for date and time inputs to ensure proper sizing */
+        input[type="date"], input[type="datetime-local"] {
+            width: 90%; /* Reverts to the browser's default sizing */
+            max-width: 100%; /* Ensures it doesn't exceed its container */
+            box-sizing: border-box;
+        }
