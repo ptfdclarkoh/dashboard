@@ -228,31 +228,59 @@ document.getElementById('sign-out-button').addEventListener('click', () => {
     signOut(auth);
 });
 
-// --- NEW: REAL-TIME LAYOUT SYSTEM ---
+// --- NEW: REAL-TIME LAYOUT SYSTEM (Enhanced) ---
 function setupRealtimeLayout() {
     const collectionRef = collection(db, 'layout_settings');
     layoutUnsubscribe = onSnapshot(collectionRef, (snapshot) => {
         snapshot.forEach(docSnap => {
             const containerId = docSnap.id;
-            const settings = docSnap.data();
+            const data = docSnap.data();
             const el = document.getElementById(containerId);
 
             if (el) {
-                // Classes to strip
-                const classesToRemove = [
-                    'w-full', 'w-3/4', 'w-2/3', 'w-1/2', 'w-1/3', 'w-1/4',
-                    'grid-cols-1', 'grid-cols-2', 'grid-cols-3', 'grid-cols-4',
-                    'gap-0', 'gap-1', 'gap-2', 'gap-3', 'gap-4', 'gap-5', 'gap-6', 'gap-7', 'gap-8'
-                ];
-                el.classList.remove(...classesToRemove);
+                // Remove existing layout classes (Base + MD + LG + XL)
+                // We use a regex-like approach by filtering known prefixes
+                const cleanClasses = (cls) => {
+                    const prefixes = ['w-', 'grid-cols-', 'gap-'];
+                    const bpPrefixes = ['md:', 'lg:', 'xl:'];
+                    
+                    let keep = true;
+                    prefixes.forEach(p => {
+                        if (cls.startsWith(p)) keep = false;
+                        bpPrefixes.forEach(bp => {
+                            if (cls.startsWith(bp + p)) keep = false;
+                        });
+                    });
+                    return keep;
+                };
                 
-                // Add new classes
-                if(settings.width) el.classList.add(settings.width);
-                if(settings.cols) el.classList.add(settings.cols);
-                if(settings.gap) el.classList.add(settings.gap);
-                
-                // Ensure grid is active
-                el.classList.add('grid');
+                el.className = el.className.split(' ').filter(cleanClasses).join(' ');
+
+                // Build new classes
+                let newClasses = ['grid']; // ensure grid
+
+                if (data.fullConfig) {
+                    // New Format: Per-Device
+                    const { base, md, lg, xl } = data.fullConfig;
+                    
+                    // Base
+                    if(base) newClasses.push(base.width, base.cols, base.gap);
+                    // MD
+                    if(md) newClasses.push(`md:${md.width}`, `md:${md.cols}`, `md:${md.gap}`);
+                    // LG
+                    if(lg) newClasses.push(`lg:${lg.width}`, `lg:${lg.cols}`, `lg:${lg.gap}`);
+                    // XL
+                    if(xl) newClasses.push(`xl:${xl.width}`, `xl:${xl.cols}`, `xl:${xl.gap}`);
+
+                } else {
+                    // Legacy/Fallback Format
+                    if(data.width) newClasses.push(data.width);
+                    if(data.cols) newClasses.push(data.cols);
+                    if(data.gap) newClasses.push(data.gap);
+                }
+
+                // Apply
+                el.className += ' ' + newClasses.join(' ');
             }
         });
     });
@@ -307,6 +335,8 @@ async function fetchPosts() {
     const msgArea = document.getElementById('posts-message-area');
     const btnIcon = document.getElementById('refresh-icon');
     
+    if(!container) return; // Guard for situations where DOM might not be ready
+
     btnIcon.classList.add('fa-spin'); // FontAwesome spin
     container.innerHTML = '';
     
@@ -797,8 +827,8 @@ maintForm.onsubmit = async (e) => {
     await setDoc(doc(db, 'maintenance', currentMaintId), {
         vendor: maintForm.querySelector('[name="Vendor"]').value,
         service: maintForm.querySelector('[name="Service"]').value,
-        location: maintForm.querySelector('[name="Location\"]').value,
-        date: maintForm.querySelector('[name="Date\"]').value
+        location: maintForm.querySelector('[name="Location"]').value,
+        date: maintForm.querySelector('[name="Date"]').value
     }, {merge: true});
     maintModal.style.display = 'none';
 };
